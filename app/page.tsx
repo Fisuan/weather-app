@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
 const sizeComparisons = [
   { size: 0.01, object: "муравей" },
@@ -22,6 +23,14 @@ const sizeComparisons = [
 export default function Home() {
   const [length, setLength] = useState("");
   const [comparison, setComparison] = useState("");
+  const [foundObjects, setFoundObjects] = useState<string[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (foundObjects.length === sizeComparisons.length) {
+      router.push('/congratulations');
+    }
+  }, [foundObjects, router]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +44,11 @@ export default function Home() {
       Math.abs(curr.size - inputLength) < Math.abs(prev.size - inputLength) ? curr : prev
     );
 
-    setComparison(`Объект примерно такого же размера: ${closestObject.object}`);
+    setComparison(`Объект примерно такого размера: ${closestObject.object}`);
+    
+    if (!foundObjects.includes(closestObject.object)) {
+      setFoundObjects([...foundObjects, closestObject.object]);
+    }
   };
 
   return (
@@ -72,6 +85,7 @@ export default function Home() {
         {comparison && (
           <p className="mt-4 text-center">{comparison}</p>
         )}
+        <p className="mt-4">Найдено объектов: {foundObjects.length} из {sizeComparisons.length}</p>
       </div>
       <div className="w-1/4 p-4">
         <svg viewBox="0 0 100 400" className="w-full h-full">
